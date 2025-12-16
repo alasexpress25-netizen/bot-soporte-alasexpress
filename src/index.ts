@@ -30,8 +30,9 @@ const TIMEZONE = process.env.TIMEZONE || 'America/Argentina/Buenos_Aires';
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const SUPPORT_FORM_URL = process.env.SUPPORT_FORM_URL || 'https://alasexpressweb.com/soporte';
 
-// Contraseña para acceder al panel de vinculación (cambiar en Railway)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'alasexpress2025';
+// URL secreta para acceder al panel - SOLO vos la sabés
+// Ejemplo: https://tu-bot.railway.app/panel-secreto-abc123
+const SECRET_PATH = process.env.SECRET_PATH || 'admin-alasexpress-2025';
 
 console.log(`
 ╔════════════════════════════════════════════════════════════╗
@@ -56,70 +57,28 @@ const io = new SocketIOServer(httpServer, {
 const publicPath = path.join(__dirname, '..', 'public');
 app.use(express.json());
 
-// Middleware de autenticación para proteger el panel
-const authMiddleware = (req: Request, res: Response, next: Function) => {
-    // Permitir assets estáticos sin auth
-    if (req.path.includes('.js') || req.path.includes('.css') || req.path.includes('socket.io')) {
-        return next();
-    }
-
-    // Verificar si ya está autenticado (cookie)
-    const authCookie = req.headers.cookie?.includes('alasexpress_auth=true');
-    if (authCookie) {
-        return next();
-    }
-
-    // Verificar contraseña en query param
-    const password = req.query.password;
-    if (password === ADMIN_PASSWORD) {
-        res.setHeader('Set-Cookie', 'alasexpress_auth=true; Path=/; Max-Age=86400');
-        return next();
-    }
-
-    // Mostrar página de login
-    if (req.path === '/' && !password) {
-        res.send(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>🔒 Acceso Restringido - AlasExpress</title>
-                <style>
-                    body { font-family: Arial; background: #1a1a2e; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                    .container { text-align: center; padding: 2rem; }
-                    h1 { color: #64ffda; }
-                    input { padding: 12px 20px; font-size: 16px; border: none; border-radius: 8px; margin: 10px; }
-                    button { padding: 12px 30px; font-size: 16px; background: #64ffda; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-                    button:hover { background: #4cd9c4; }
-                    .error { color: #ff6b6b; margin-top: 10px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🔒 Bot Soporte AlasExpress</h1>
-                    <p>Este panel es exclusivo para administradores.</p>
-                    <form method="GET">
-                        <input type="password" name="password" placeholder="Contraseña" required>
-                        <br>
-                        <button type="submit">Acceder</button>
-                    </form>
-                    ${req.query.password ? '<p class="error">❌ Contraseña incorrecta</p>' : ''}
-                </div>
-            </body>
-            </html>
-        `);
-        return;
-    }
-
-    res.redirect('/');
-};
-
-app.use(authMiddleware);
-app.use(express.static(publicPath));
-
-// Página principal - QR
+// Página principal - Bloquea acceso, no muestra nada útil
 app.get('/', (req: Request, res: Response) => {
+    res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>404</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>404 - Página no encontrada</h1>
+            <p>El recurso solicitado no existe.</p>
+        </body>
+        </html>
+    `);
+});
+
+// URL SECRETA - Solo vos la conocés
+// Accedé via: https://tu-bot.railway.app/admin-alasexpress-2025
+app.get(`/${SECRET_PATH}`, (req: Request, res: Response) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
+
+// Socket.io solo funciona si venís de la URL secreta
+app.use(express.static(publicPath));
 
 // API: Estado del bot
 app.get('/api/status', (req: Request, res: Response) => {
