@@ -1,10 +1,16 @@
 /**
  * Configuración de Firebase Admin para AlasExpress
+ *
+ * SEGURIDAD: Este bot SOLO funciona con el proyecto alasexpresspro
+ * No se puede usar con otros proyectos de Firebase
  */
 
 import * as admin from 'firebase-admin';
 import * as path from 'path';
 import * as fs from 'fs';
+
+// Proyecto permitido - SOLO alasexpresspro puede usar este bot
+const ALLOWED_PROJECT_ID = 'alasexpresspro';
 
 let db: admin.firestore.Firestore;
 
@@ -38,6 +44,22 @@ function initializeFirebase(): void {
         }
     }
 
+    // 🔒 VALIDACIÓN DE SEGURIDAD: Solo permitir proyecto alasexpresspro
+    if (serviceAccount.project_id !== ALLOWED_PROJECT_ID) {
+        console.error('');
+        console.error('╔════════════════════════════════════════════════════════════╗');
+        console.error('║  ❌ ERROR DE SEGURIDAD                                     ║');
+        console.error('║                                                            ║');
+        console.error('║  Este bot es exclusivo para AlasExpress.                   ║');
+        console.error('║  No se puede usar con otros proyectos de Firebase.         ║');
+        console.error('║                                                            ║');
+        console.error(`║  Proyecto detectado: ${serviceAccount.project_id.padEnd(35)}║`);
+        console.error(`║  Proyecto requerido: ${ALLOWED_PROJECT_ID.padEnd(35)}║`);
+        console.error('╚════════════════════════════════════════════════════════════╝');
+        console.error('');
+        process.exit(1);
+    }
+
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
@@ -46,6 +68,7 @@ function initializeFirebase(): void {
 
     console.log('✅ Firebase Admin inicializado');
     console.log(`📁 Proyecto: ${serviceAccount.project_id}`);
+    console.log('🔒 Verificación de seguridad: OK');
 }
 
 initializeFirebase();
