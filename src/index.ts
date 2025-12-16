@@ -18,7 +18,8 @@ import {
     initializeAI,
     handleSupportMessage,
     getWelcomeMessage,
-    reloadDocuments
+    reloadDocuments,
+    submitTicketToFormspree
 } from './services/supportService';
 import { Request, Response } from 'express';
 
@@ -180,6 +181,18 @@ client.on('message', async (msg) => {
         if (response.needsHumanSupport) {
             console.log(`🔔 Ticket derivado a humano - Categoría: ${response.category}`);
 
+            // Enviar ticket a Formspree automáticamente
+            const ticketSent = await submitTicketToFormspree(
+                userName || 'Cliente WhatsApp',
+                clientPhone,
+                userMessage,
+                response.category || 'general'
+            );
+
+            if (ticketSent) {
+                console.log(`📧 Ticket enviado exitosamente a Formspree`);
+            }
+
             // Opcional: Guardar en Firebase para seguimiento
             try {
                 await db.collection('support_tickets').add({
@@ -188,7 +201,8 @@ client.on('message', async (msg) => {
                     message: userMessage,
                     category: response.category,
                     timestamp: new Date(),
-                    status: 'pending'
+                    status: 'pending',
+                    formspree_sent: ticketSent
                 });
             } catch (e) {
                 console.warn('⚠️ No se pudo guardar ticket en Firebase');

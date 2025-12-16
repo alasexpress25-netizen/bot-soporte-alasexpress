@@ -14,6 +14,9 @@ let groq: Groq | null = null;
 // Modelo pequeño y económico
 const MODEL_NAME = 'llama-3.1-8b-instant';
 
+// URL de Formspree para enviar tickets
+const FORMSPREE_URL = 'https://formspree.io/f/meoyrqyq';
+
 // Cache de documentos de ayuda
 let helpDocuments: Map<string, { title: string; content: string; keywords: string[] }> = new Map();
 
@@ -255,10 +258,10 @@ export async function handleSupportMessage(
         };
     }
 
-    // Paso 4: No encontramos solución - derivar a formulario
+    // Paso 4: No encontramos solución - derivar a humano
     return {
         found: false,
-        message: `${userName ? `${userName}, ` : ''}entiendo tu problema pero necesito que un humano lo revise. 🙏\n\nPor favor completá este formulario y te contactaremos pronto:\n👉 ${formUrl}\n\nCategoria: ${analysis.category}\nResumen: ${analysis.summary}`,
+        message: `${userName ? `${userName}, ` : ''}entiendo tu problema pero necesito que un humano lo revise. 🙏\n\n✅ Ya envié tu caso a nuestro equipo de soporte. Te van a contactar pronto.\n\nMientras tanto, si querés podés dejarnos más detalles.\n\n📋 Categoría: ${analysis.category}`,
         needsHumanSupport: true,
         category: analysis.category
     };
@@ -291,5 +294,43 @@ Algunos temas en los que puedo ayudarte:
 export function reloadDocuments(): void {
     helpDocuments.clear();
     loadHelpDocuments();
+}
+
+/**
+ * Envía un ticket a Formspree cuando el bot no puede resolver el problema
+ */
+export async function submitTicketToFormspree(
+    name: string,
+    phone: string,
+    message: string,
+    category: string
+): Promise<boolean> {
+    try {
+        const response = await fetch(FORMSPREE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name || 'Cliente WhatsApp',
+                email: `whatsapp_${phone}@bot.alasexpress.com`,
+                phone: phone,
+                message: `[TICKET BOT - ${category.toUpperCase()}]\n\nTeléfono: ${phone}\nCategoría: ${category}\n\nMensaje del cliente:\n${message}`,
+                _subject: `🤖 Ticket Bot WhatsApp - ${category}`
+            })
+        });
+
+        if (response.ok) {
+            console.log(`📧 Ticket enviado a Formspree para ${phone}`);
+            return true;
+        } else {
+            console.error('❌ Error enviando a Formspree:', await response.text());
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error enviando ticket:', error);
+        return false;
+    }
 }
 
