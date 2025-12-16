@@ -1,0 +1,31 @@
+# Dependencias
+node_modules/
+dist/
+
+# Variables de entorno
+.env
+
+# Credenciales
+firebase-credentials.json
+*.pem
+*.key
+
+# Sesiones de WhatsApp
+whatsapp-sessions/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+

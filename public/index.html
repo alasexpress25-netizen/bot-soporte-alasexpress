@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Soporte - AlasExpress</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #8892b0;
+            margin-bottom: 2rem;
+        }
+        #qr-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            display: inline-block;
+            margin: 1.5rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        #qr-container img {
+            max-width: 280px;
+            height: auto;
+        }
+        #status {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        .status-waiting {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        .status-connected {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+        .status-error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        .instructions {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            text-align: left;
+        }
+        .instructions h3 {
+            margin-bottom: 1rem;
+            color: #64ffda;
+        }
+        .instructions ol {
+            padding-left: 1.5rem;
+        }
+        .instructions li {
+            margin-bottom: 0.5rem;
+            color: #8892b0;
+        }
+        .connected-message {
+            display: none;
+            text-align: center;
+        }
+        .connected-message .check {
+            font-size: 4rem;
+            color: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>Bot Soporte AlasExpress</h1>
+        <p class="subtitle">Vinculá WhatsApp para activar el soporte automático</p>
+
+        <div id="qr-section">
+            <div id="qr-container">
+                <p style="color: #666; padding: 2rem;">Esperando código QR...</p>
+            </div>
+
+            <div id="status" class="status-waiting">⏳ Esperando conexión</div>
+
+            <div class="instructions">
+                <h3>📱 Instrucciones</h3>
+                <ol>
+                    <li>Abrí WhatsApp en tu celular</li>
+                    <li>Tocá los tres puntos → "Dispositivos vinculados"</li>
+                    <li>Tocá "Vincular un dispositivo"</li>
+                    <li>Escaneá el código QR</li>
+                </ol>
+            </div>
+        </div>
+
+        <div id="connected-section" class="connected-message">
+            <div class="check">✅</div>
+            <h2>¡Bot Conectado!</h2>
+            <p style="color: #8892b0; margin-top: 1rem;">
+                El bot de soporte está activo y respondiendo mensajes automáticamente.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.on('qr', (qrDataUrl) => {
+            document.getElementById('qr-container').innerHTML = `<img src="${qrDataUrl}" alt="QR Code">`;
+            updateStatus('waiting', '⏳ Escaneá el código QR');
+        });
+
+        socket.on('status', (data) => {
+            if (data.estado === 'autenticado') {
+                updateStatus('connected', '🔄 Autenticando...');
+            } else if (data.estado === 'conectado') {
+                showConnected();
+            } else if (data.estado === 'desconectado') {
+                updateStatus('error', '❌ Desconectado');
+            }
+        });
+
+        socket.on('ready', () => {
+            showConnected();
+        });
+
+        function updateStatus(type, text) {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = `status-${type}`;
+        }
+
+        function showConnected() {
+            document.getElementById('qr-section').style.display = 'none';
+            document.getElementById('connected-section').style.display = 'block';
+            updateStatus('connected', '✅ Bot activo');
+        }
+    </script>
+</body>
+</html>
+

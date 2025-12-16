@@ -1,0 +1,31 @@
+{
+  "name": "bot-soporte-alasexpress",
+  "version": "1.0.0",
+  "description": "Bot de soporte técnico para AlasExpress con IA",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "^1.26.0",
+    "qrcode": "^1.5.3",
+    "qrcode-terminal": "^0.12.0",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "firebase-admin": "^12.0.0",
+    "groq-sdk": "^0.5.0",
+    "dotenv": "^16.3.1",
+    "luxon": "^3.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/qrcode": "^1.5.5",
+    "@types/luxon": "^3.3.4",
+    "typescript": "^5.3.2",
+    "ts-node": "^10.9.1"
+  }
+}
+
