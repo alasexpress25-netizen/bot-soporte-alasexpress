@@ -261,7 +261,19 @@ export async function handleSupportMessage(
     // Paso 4: No encontramos solución - derivar a humano
     return {
         found: false,
-        message: `${userName ? `${userName}, ` : ''}entiendo tu problema pero necesito que un humano lo revise. 🙏\n\n✅ Ya envié tu caso a nuestro equipo de soporte. Te van a contactar pronto.\n\nMientras tanto, si querés podés dejarnos más detalles.\n\n📋 Categoría: ${analysis.category}`,
+        message: `${userName ? `${userName}, ` : ''}entiendo tu problema pero necesito que un humano lo revise. 🙏
+
+Para que podamos ayudarte, por favor completá el formulario de soporte:
+👉 https://alasexpressweb.com
+
+📝 *IMPORTANTE:*
+• En el asunto escribí: *ATENCION HUMANA*
+• Dejá tu *número de teléfono completo* (con código de área)
+• Describí tu problema lo más detallado posible
+
+📞 Nos vamos a comunicar con vos por WhatsApp lo antes posible.
+
+¡Gracias por tu paciencia! 💪`,
         needsHumanSupport: true,
         category: analysis.category
     };
@@ -278,14 +290,17 @@ export function getWelcomeMessage(userName: string | null): string {
 
 Soy el asistente de soporte de *AlasExpress*. 🚀
 
-Contame tu problema y voy a intentar ayudarte. Si no puedo resolverlo, te voy a pasar con un humano.
+Contame tu problema y voy a intentar ayudarte.
 
 Algunos temas en los que puedo ayudarte:
 • Problemas de login
 • Problemas con pagos
 • Errores en la app
 • Consultas sobre envíos
-• Problemas con tu cuenta`;
+• Problemas con tu cuenta
+
+📱 *¿No sabés usar la app?*
+Seguinos en Instagram: *@alasexpress.25* donde tenemos tutoriales y guías.`;
 }
 
 /**
